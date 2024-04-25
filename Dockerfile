@@ -1,0 +1,27 @@
+# Use a base image with necessary dependencies
+FROM ubuntu:latest
+
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y fortune-mod cowsay netcat && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set environment variables
+ENV SRVPORT=4499
+ENV RSPFILE=response
+
+# Copy the script containing the function definition
+COPY handleRequest.sh /
+
+# Make the script executable
+RUN chmod +x /handleRequest.sh
+
+# Remove any existing response file and create a named pipe
+RUN rm -f $RSPFILE && \
+    mkfifo $RSPFILE
+
+# Expose the port on which the application will run
+EXPOSE $SRVPORT
+
+# Run the application using the script
+CMD /bin/bash -c "/handleRequest.sh"
